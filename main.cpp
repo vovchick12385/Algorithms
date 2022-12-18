@@ -8,13 +8,6 @@
 
 using namespace std;
 
-struct ListNode {
-    int val;
-    ListNode* next;
-    ListNode() : val(0), next(nullptr) {}
-    ListNode(int x) : val(x), next(nullptr) {}
-    ListNode(int x, ListNode* next) : val(x), next(next) {}
-};
 
 void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {
     if (n == 0)
@@ -115,31 +108,6 @@ ListNode* middleNode(ListNode* head) {
     return it1;
 }
 
-ListNode* sortList(ListNode* head) {
-    if (head->next->next == nullptr)
-    {
-        auto it1 = head->val;
-        auto it2 = head->next;
-        if (it1 > it2->val)
-        {
-            head->val = it2->val;
-            it2->val = it1;
-        }
-        return head;
-    }
-    else if (head->next == nullptr)
-    {
-        return head;
-    }
-    auto it1 = middleNode(head);
-    auto it2 = it1->next;
-    it1->next = nullptr;
-    head = sortList(head);
-    it2 = sortList(it2);
-    it1->next = it2;
-    return head;
-}
-
 void reverseString(vector<char>& s) {
     auto it1 = s.begin();
     auto it2 = s.end();
@@ -184,29 +152,16 @@ void moveZeroes(vector<int>& nums) {
 }
 
 int removeElement(vector<int>& nums, int val) {
-    auto it1 = nums.begin();
-    auto it2 = nums.end();
-    --it2;
-    int out;
-    while (it1 != it2)
+    vector<int> outvec;
+    for (const auto& c : nums)
     {
-        if (*it1 == val)
+        if (c != val)
         {
-            if (*it2 != val)
-            {
-                *it1 = *it2;
-                *it2 = val;
-                ++it1;
-                --it2;
-            }
-        }
-        else
-        {
-            ++it1;
-            --it2;
+            outvec.push_back(c);
         }
     }
-    out = distance(nums.begin(), it1) - 1;
+    int out = outvec.size();
+    swap(nums, outvec);
     return out;
 }
 
@@ -235,19 +190,171 @@ vector<int> twoSum(vector<int>& numbers, int target) {
     return out;
 }
 
+int removeDuplicates(vector<int>& nums) {
+    auto it1 = nums.begin();
+    vector<int> copy;
+    copy.push_back(*it1);
+    auto it2 = copy.begin();
+    for (it1; it1 != nums.end(); ++it1)
+    {
+        if (*it1 != *it2)
+        {
+            copy.push_back(*it1);
+            it2 = copy.end();
+            it2--;
+        }
+    }
+    int t = copy.size();
+    swap(nums, copy);
+    return t;
+
+}
+
+ListNode* reverseList(ListNode* head) {
+    auto prev = head;
+    if (head == nullptr || head->next == nullptr)
+        return head;
+    auto next = head->next;
+    if (head->next->next)
+        head = head->next->next;
+    else
+    {
+        prev->next = nullptr;
+        next->next = prev;
+        return next;
+    }
+    prev->next = nullptr;
+    next->next = prev;
+    while (head->next)
+    {
+
+        auto it = prev;
+        prev = next;
+        prev->next = it;
+        next = head;
+        head = head->next;
+        next->next = prev;
+    }
+    prev = next;
+    next = head;
+    next->next = prev;
+    return next;
+}
+
+bool isPalindrome(ListNode* head) {
+    if (head == nullptr || head->next == nullptr)
+        return true;
+    if (head->next->next == nullptr)
+    {
+        if (head->val != head->next->val)
+            return false;
+        return true;
+    }
+    auto it1 = middleNode(head);
+    it1 = reverseList(it1);
+
+
+    do
+    {
+        if (head->val != it1->val)
+            return false;
+        head = head->next;
+        it1 = it1->next;
+    } while (it1->next);
+    if (head->val != it1->val)
+        return false;
+    return true;
+}
+
+string reverseWords(string s) {
+    string str = "";
+    vector<char> str_vec;
+    for (const auto& c : s)
+    {
+        if (c != ' ')
+            str_vec.push_back(c);
+        else
+        {
+            reverseString(str_vec);
+            for (const auto& c : str_vec)
+            {
+                str += c;
+            }
+            str_vec.clear();
+            str += " ";
+        }
+    }
+    reverseString(str_vec);
+    for (const auto& c : str_vec)
+    {
+        str += c;
+    }
+    return str;
+
+}
+
+vector<int> sortArrayByParity(vector<int>& nums) {
+    auto it1 = nums.begin();
+    auto it2 = nums.begin();
+    vector<int> even, odd;
+    for (auto it = nums.begin(); it != nums.end(); ++it)
+    {
+        if (*it % 2 == 0)
+        {
+            even.push_back(*it);
+        }
+        else
+            odd.push_back(*it);
+    }
+    for (auto it = odd.begin(); it != odd.end(); ++it)
+    {
+        even.push_back(*it);
+    }
+    return even;
+}
+
+ListNode* removeNthFromEnd(ListNode* head, int n) {
+    if (head->val == n && head->next == nullptr)
+    {
+        head = nullptr;
+        return head;
+    }
+    head = reverseList(head);
+    auto it1 = head;
+    auto it2 = head;
+    if (n != 1)
+    {
+        for (int i = 0; i < n - 1; ++i)
+        {
+
+            it1 = it2;
+            it2 = it2->next;
+
+        }
+
+        it1->next = it2->next;
+        it2 = it2->next;
+    }
+    else
+    {
+        head = head->next;
+    }
+    head = reverseList(head);
+    return head;
+}
+
 int main() {
     
     int n;
     cin >> n;
     int k;
     vector<int> nums;
-    int 
     for (int i = 0; i < n; ++i)
     {
         cin >> k;
         nums.push_back(k);
     }
-    moveZeroes(nums);
+    removeDuplicates(nums);
     for (int i = 0; i < n; ++i)
     {
         cout << nums[i] << " ";
