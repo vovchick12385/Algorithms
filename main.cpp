@@ -343,6 +343,77 @@ ListNode* removeNthFromEnd(ListNode* head, int n) {
     return head;
 }
 
+ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
+    if (list1 == nullptr && list2 != nullptr)
+        return list2;
+    else if (list2 == nullptr && list1 != nullptr)
+        return list1;
+    else if (list1 == nullptr && list2 == nullptr)
+        return nullptr;
+    ListNode* dummy = new ListNode();
+    ListNode* temp = dummy;
+    while (list1 && list2)
+    {
+        if (list1->val <= list2->val)
+        {
+            temp->next = new ListNode(list1->val);
+            temp = temp->next;
+            list1 = list1->next;
+        }
+        else
+        {
+            temp->next = new ListNode(list2->val);
+            temp = temp->next;
+            list2 = list2->next;
+        }
+    }
+    while (list1)
+    {
+        temp->next = new ListNode(list1->val);
+        temp = temp->next;
+        list1 = list1->next;
+    }
+    while (list2)
+    {
+        temp->next = new ListNode(list2->val);
+        temp = temp->next;
+        list2 = list2->next;
+    }
+    dummy = dummy->next;
+    return dummy;
+}
+
+ListNode* sortList(ListNode* head) {
+    if (head == nullptr || head->next == nullptr)
+        return head;
+    if (head->next->next == nullptr)
+    {
+        if (head->val >= head->next->val)
+        {
+            auto temp = new ListNode(head->next->val, head);
+            temp->next->next = nullptr;
+            return temp;
+        }
+        else
+            return head;
+    }
+    auto it1 = middleNode(head);
+    auto it2 = head;
+    auto dummy = new ListNode(head->val);
+    auto temp = dummy;
+    while (it2->next != it1)
+    {
+        it2 = it2->next;
+        temp->next = new ListNode(it2->val);
+        temp = temp->next;
+    }
+
+    dummy = sortList(dummy);
+    it1 = sortList(it1);
+    dummy = mergeTwoLists(dummy, it1);
+    return dummy;
+}
+
 int main() {
     
     int n;
