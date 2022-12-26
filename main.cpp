@@ -89,21 +89,10 @@ bool hasCycle(ListNode* head) {
 ListNode* middleNode(ListNode* head) {
     auto it1 = head;
     auto it2 = head;
-    while (it2->next != nullptr)
+    while (it2 && it2->next)
     {
-        if (it1->next != nullptr)
-        {
-            it1 = it1->next;
-
-        }
-        else
-            break;
-
-        if (it2->next->next != nullptr)
-            it2 = it2->next->next;
-        else
-            break;
-
+        it1 = it1->next;
+        it2 = it2->next->next;
     }
     return it1;
 }
