@@ -9,7 +9,7 @@
 using namespace std;
 
 
-void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {
+/*void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {
     if (n == 0)
         return;
     auto it1 = nums1.begin();
@@ -363,3 +363,10 @@ int main() {
 }
 
 
+*/
+#include "IKVDatabases.h"
+
+int main() {
+    IKWrapper db_wrapper();
+
+}
