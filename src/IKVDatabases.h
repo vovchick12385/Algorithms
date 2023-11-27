@@ -45,18 +45,15 @@ struct IKWrapper: IKVDatabase{
 
     virtual std::string get(std::string_view key) override{
         std::string out;
-        wrap_mute.lock_shared();
+        std::shared_lock<std::shared_mutex> s_lock(wrap_mute);
         const auto& it = cache.find(key.data());
         if(it != end(cache))
             wrap_mute.unlock_shared();
             return it->second;
-        wrap_mute.unlock_shared();
-
+        s_lock.unlock();
         out = IKVDatabase::get(key);
-
-        wrap_mute.lock_shared();
+        s_lock.try_lock();
         cache[key.data()] = out;
-        wrap_mute.unlock_shared();
         return out;
     }
     virtual std::vector<std::string> all_keys() override{
@@ -81,9 +78,7 @@ private:
                 temp[key] = IKVDatabase::get(key);
             }
             lock.lock();
-            //wrap_mute.lock();
             cache.swap(temp);
-            //wrap_mute.unlock;
 
         }
     }
