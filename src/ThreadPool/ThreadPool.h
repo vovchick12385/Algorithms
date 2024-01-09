@@ -3,45 +3,39 @@
 //
 
 #pragma once
-#include <queue>
 #include <vector>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
+//#include <thread>
+#include <atomic>
+#include <functional>
+#include "ThreadSafeQueue.h"
 
-using namespace std::chrono_literals;
-void Task(){
-    std::this_thread::sleep_for(10ms);
-}
-
-template <typename T>
 class ThreadPool {
 public:
-    ThreadPool() = default;
-    void Add_task(T* val);
+    explicit ThreadPool(std::size_t num_threads){
+        for(std::size_t i =0; i < num_threads;++i)
+            threads.push_back(std::thread{[this]{
+                while(!is_done){
+                    std::function<void()> task;
+                    if(queue_.Get_task(task))
+                        task();
+                    else
+                        std::this_thread::yield();
+                }
+            }});
+    }
 
-    T Get_task();
+    void submit(){
+        queue_.Add_task(&Task);
+    }
+    ~ThreadPool(){
+        is_done = true;
+    }
+
 
 private:
-    std::queue<T> tasks;
-    mutable std::mutex mute;
-    std::condition_variable queue_cv;
+    std::atomic<bool> is_done = false;
+    ThreadSafeQueue<std::function<void()>> queue_;
+    std::vector<std::thread> threads;
 };
-
-template<typename T>
-T ThreadPool<T>::Get_task() {
-    std::unique_lock<std::mutex> queue_lock(mute);
-    queue_cv.wait(queue_lock, [&]{return !tasks.empty();});
-    T out = tasks.front();
-    tasks.pop();
-    return out;
-}
-
-template<typename T>
-void ThreadPool<T>::Add_task(T* val) {
-    std::lock_guard lock(mute);
-    tasks.push(val);
-    queue_cv.notify_one();
-}
 
 
