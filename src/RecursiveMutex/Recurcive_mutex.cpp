@@ -3,7 +3,7 @@
 //
 
 #include "Recurcive_mutex.h"
-#include <exception>
+#include <atomic>
 
 Recursive_mutex::Recursive_mutex() {
     count_lock =0;
@@ -11,15 +11,19 @@ Recursive_mutex::Recursive_mutex() {
 }
 
 Recursive_mutex::~Recursive_mutex() {
-    count_lock--;
-
+    //
 }
 
 void Recursive_mutex::lock() {
     if(std::this_thread::get_id()!= thread_id)
         throw std::runtime_error("try to lock locked mutex");
-    if(!count_lock)
+    auto old_value =  count_lock.load();
+    if(!old_value) {
+        while (!count_lock.compare_exchange_strong(old_value, old_value + 1, std::memory_order_release)) {
+            std::this_thread::yield();
+        }
         mute.lock();
+    }
     count_lock++;
 }
 
@@ -40,6 +44,7 @@ bool Recursive_mutex::try_lock() {
 void Recursive_mutex::unlock() {
     if(std::this_thread::get_id() != thread_id)
         throw std::runtime_error("try to unlock mute in the not current thread");
+
     count_lock--;
     if(count_lock <=0)
         mute.unlock();
